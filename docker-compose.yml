@@ -36,3 +36,29 @@ services:
     depends_on:
       - zookeeper
       - kafka
+
+  consumer:
+    build:
+      context: .
+      dockerfile: services/consumer/Dockerfile
+    volumes:
+      - "./:/code/"
+    container_name: consumer
+    entrypoint: [ "python3", "/code/services/consumer/main.py" ]
+    depends_on:
+      - zookeeper
+      - kafka
+      - kafdrop
+
+  publisher:
+    build:
+      context: .
+      dockerfile: services/publisher/Dockerfile
+    volumes:
+      - "./:/code/"
+    container_name: publisher
+    entrypoint: [ "python3", "/code/services/publisher/main.py" ]
+    depends_on:
+      - zookeeper
+      - kafka
+      - kafdrop
