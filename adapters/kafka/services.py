@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import json
 import threading, time
 from typing import Callable
 
@@ -10,8 +11,9 @@ from common.logger import log
 
 
 class Producer(threading.Thread):
-    def __init__(self, topics: list[str] = None):
+    def __init__(self, topics: list[str] = None, event: dict = None):
         self.topics = topics
+        self.event = event
         threading.Thread.__init__(self)
         self.stop_event = threading.Event()
 
@@ -21,12 +23,13 @@ class Producer(threading.Thread):
     def run(self):
         producer = KafkaProducer(
             api_version=(0, 10, 1),
-            bootstrap_servers='kafka:9092'
+            bootstrap_servers='kafka:9092',
+            value_serializer=lambda v: json.dumps(v).encode("utf-8")
         )
 
         while not self.stop_event.is_set():
             for topic in self.topics:
-                producer.send(topic, b"test")
+                producer.send(topic, self.event)
             time.sleep(1)
 
         producer.close()
@@ -49,7 +52,8 @@ class Consumer(threading.Thread):
             auto_offset_reset='earliest',
             group_id='my-group',
             enable_auto_commit=True,
-            consumer_timeout_ms=1000
+            consumer_timeout_ms=1000,
+            value_deserializer=lambda v: json.loads(v.decode("utf-8"))
         )
         consumer.subscribe(self.topics)
 
