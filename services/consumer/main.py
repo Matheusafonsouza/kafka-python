@@ -1,14 +1,12 @@
 from sys import exit
 
 from adapters.kafka.services import Consumer
+from adapters.event.schemas import Event
 from common.logger import log
 
 
-def callback(message):
-    msg = (
-        f"{message.topic}:{message.partition}:{message.offset}: "
-        f"{message.key=} {message.value=}"
-    )
+def callback(event: Event):
+    msg = f"{event.event_id} - {event.timestamp}: {event.message}"
     log.info(msg)
 
 

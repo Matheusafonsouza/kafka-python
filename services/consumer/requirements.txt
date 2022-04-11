@@ -12,8 +12,10 @@ pickleshare==0.7.5
 prompt-toolkit==3.0.29
 ptyprocess==0.7.0
 pure-eval==0.2.2
+pydantic==1.9.0
 Pygments==2.11.2
 six==1.16.0
 stack-data==0.2.0
 traitlets==5.1.1
+typing_extensions==4.1.1
 wcwidth==0.2.5

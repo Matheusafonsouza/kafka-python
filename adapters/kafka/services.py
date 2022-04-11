@@ -8,10 +8,11 @@ from kafka.admin import NewTopic
 from kafka.errors import TopicAlreadyExistsError
 
 from common.logger import log
+from adapters.event.schemas import Event
 
 
 class Producer(threading.Thread):
-    def __init__(self, topics: list[str] = None, event: dict = None):
+    def __init__(self, topics: list[str] = None, event: Event = None):
         self.topics = topics
         self.event = event
         threading.Thread.__init__(self)
@@ -27,10 +28,9 @@ class Producer(threading.Thread):
             value_serializer=lambda v: json.dumps(v).encode("utf-8")
         )
 
-        while not self.stop_event.is_set():
-            for topic in self.topics:
-                producer.send(topic, self.event)
-            time.sleep(1)
+        for topic in self.topics:
+            producer.send(topic, self.event.json())
+        time.sleep(1)
 
         producer.close()
 
@@ -59,7 +59,8 @@ class Consumer(threading.Thread):
 
         while not self.stop_event.is_set():
             for message in consumer:
-                self.callback(message)
+                event = Event.parse_raw(message.value)
+                self.callback(event)
                 if self.stop_event.is_set():
                     break
 
